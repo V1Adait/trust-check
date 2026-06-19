@@ -1,7 +1,22 @@
 import { isFlaggedDomain, getDomainLabel } from './domain-list.js';
 
+// Major platform root domains — a flagged intermediary landing here is suspicious
+// because these services never legitimately redirect to their own homepage
+const MAJOR_ROOTS = new Set([
+  'google.com', 'microsoft.com', 'apple.com', 'amazon.com',
+  'facebook.com', 'instagram.com', 'linkedin.com', 'twitter.com', 'x.com',
+  'paypal.com', 'netflix.com', 'dropbox.com',
+]);
+
 function hostnameOf(url) {
   try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
+}
+
+function looksLikeCloaking(chain) {
+  if (chain.length < 2) return false;
+  const first = hostnameOf(chain[0]);
+  const last  = hostnameOf(chain[chain.length - 1]);
+  return isFlaggedDomain(first) && MAJOR_ROOTS.has(last);
 }
 
 export function generateVerdicts({ chains = [], anchorMismatches = [], auth = null, senderDomain = null, workerMissing = false }) {
@@ -11,6 +26,17 @@ export function generateVerdicts({ chains = [], anchorMismatches = [], auth = nu
   for (const chain of chains) {
     const hops = chain.filter(h => typeof h === 'string');
     if (hops.length <= 1) continue;
+
+    // Cloaking check — must run before flagged-hop verdicts so it appears first
+    if (looksLikeCloaking(hops)) {
+      const first = hostnameOf(hops[0]);
+      const last  = hostnameOf(hops[hops.length - 1]);
+      verdicts.push({
+        level: 'danger',
+        title: 'Possible cloaking detected',
+        detail: `This link goes through ${first} (a redirect service) and appears to land on ${last}. Legitimate ${first} links never resolve to the ${last} homepage — this pattern strongly suggests the server is detecting automated scanners and showing them a safe destination while redirecting real users elsewhere. The actual destination seen in a browser is likely different from what this tool observed.`,
+      });
+    }
 
     const flagged = hops.filter(u => isFlaggedDomain(hostnameOf(u)));
     for (const hop of flagged) {
