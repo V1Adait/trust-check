@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trust Check — Fortulio</title>
+  <meta name="description" content="Detect trust laundering in URLs and emails. Free tool by Fortulio.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="brand">
+      <span class="brand-name">Fortulio</span>
+      <span class="brand-sep">/</span>
+      <span class="brand-tool">Trust Check</span>
+    </div>
+    <p class="tagline">Detect trust laundering in URLs and emails — free, open source, nothing stored</p>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-mode="url"   role="tab" aria-selected="true">URL Check</button>
+    <button class="tab"        data-mode="email" role="tab" aria-selected="false">Email Analysis</button>
+  </div>
+
+  <div class="input-card">
+
+    <div id="url-section">
+      <label for="url-input">Paste a URL to analyse</label>
+      <input
+        type="text"
+        id="url-input"
+        placeholder="https://share.google/... or bit.ly/..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+    </div>
+
+    <div id="email-section" hidden>
+      <label for="email-input">
+        Paste raw email source
+        <span class="hint"> — Gmail: ⋮ → Show original &nbsp;·&nbsp; Outlook: File → Properties</span>
+      </label>
+      <textarea
+        id="email-input"
+        rows="11"
+        placeholder="Received: from mail.example.com ...
+Authentication-Results: mx.google.com;
+   spf=fail ...
+   dkim=pass ...
+
+<html><body>
+  <a href=&quot;https://share.google/xyz&quot;>Click here to verify your Amazon account</a>
+</body></html>"
+        spellcheck="false"
+      ></textarea>
+    </div>
+
+    <button id="analyze-btn" class="btn-primary">Analyse</button>
+
+  </div>
+
+  <div id="loading" hidden>
+    <div class="spinner"></div>
+    <span>Resolving redirect chain…</span>
+  </div>
+
+  <section id="results" hidden>
+    <div id="chain-wrap" hidden></div>
+    <div id="verdict-list"></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>
+      Free tool by <a href="https://fortulio.com" target="_blank" rel="noopener">Fortulio</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/fortulio/trust-check" target="_blank" rel="noopener">View on GitHub</a>
+      &nbsp;·&nbsp;
+      No data is stored or logged
+    </p>
+  </div>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
